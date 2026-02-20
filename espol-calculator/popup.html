@@ -258,35 +258,66 @@
             </div>
         </main>
 
-        <!-- === HISTORY === -->
+        <!-- === HISTORY (Dashboard Layout V12) === -->
         <main id="history" class="view-section" style="flex-direction: column;">
-            <div class="history-header">
-                <div>
+
+            <!-- 1. HEADER DASHBOARD (Promedio + Franja) -->
+            <div class="history-dashboard-header"
+                style="display: flex; gap: 15px; margin-bottom: 20px; align-items: stretch;">
+
+                <!-- PROMEDIO (Izq) -->
+                <div class="stat-card"
+                    style="flex: 1; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between;">
                     <div
                         style="font-size:0.75rem; color:var(--text-secondary); font-weight:600; text-transform: uppercase;">
-                        Promedio General</div>
+                        Promedio</div>
+                    <div style="font-size:2.5rem; font-weight:400; color:var(--text-primary); font-family: var(--font-serif); line-height: 1;"
+                        id="general-average">--</div>
                 </div>
-                <div style="font-size:2rem; font-weight:400; color:var(--text-primary); font-family: var(--font-serif);"
-                    id="general-average">--</div>
+
+                <!-- FRANJA (Der) -->
+                <!-- Reuse IDs to keep JS working -->
+                <div id="slot-display" class="stat-card"
+                    style="display: none; flex: 1; background: var(--group-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; flex-direction: column; justify-content: center; border-left: 4px solid var(--text-accent);">
+                    <div
+                        style="font-size:0.7rem; color:var(--text-secondary); text-transform:uppercase; font-weight:600; margin-bottom: 5px; font-family: var(--font-sans);">
+                        Tu Franja</div>
+                    <div id="slot-name"
+                        style="font-weight:bold; color:var(--text-primary); font-family: var(--font-serif); font-size: 1rem; line-height: 1.2;">
+                        --</div>
+                    <div id="slot-time"
+                        style="font-size:0.75rem; color:var(--text-secondary); margin-top: 4px; font-family: var(--font-sans);">
+                        --</div>
+                </div>
             </div>
 
-            <div style="display:flex; gap:10px; margin-bottom:15px; align-items: flex-end;">
-                <div class="input-group" style="flex:2">
-                    <input type="text" id="h-manual-name" placeholder="Materia">
+            <!-- 2. CONTROLES (Importar + Manual) -->
+            <div style="margin-bottom: 15px;">
+                <button class="btn-primary" id="btn-import-grades"
+                    style="background-color: var(--text-accent); font-size:0.9rem; margin-bottom: 10px;">
+                    Importar desde Académico
+                </button>
+
+                <div style="display:flex; gap:10px; align-items: flex-end;">
+                    <div class="input-group" style="flex:2; margin-bottom:0;">
+                        <input type="text" id="h-manual-name" placeholder="Materia">
+                    </div>
+                    <div class="input-group" style="flex:1; margin-bottom:0;">
+                        <input type="number" id="h-manual-grade" placeholder="Nota">
+                    </div>
+                    <button class="btn-primary" id="h-manual-add"
+                        style="width:auto; padding: 10px 15px; height: 38px;">+</button>
                 </div>
-                <div class="input-group" style="flex:1">
-                    <input type="number" id="h-manual-grade" placeholder="Nota">
-                </div>
-                <button class="btn-primary" id="h-manual-add"
-                    style="width:auto; padding: 10px 15px; margin-bottom: 12px;">+</button>
             </div>
 
-            <div style="flex:1; overflow-y:auto;" id="history-list">
+            <!-- 3. LISTA (Todo el resto) -->
+            <div style="flex:1; overflow-y:auto; min-height: 0; border-top: 1px solid var(--border-color); padding-top: 10px;"
+                id="history-list">
                 <!-- Items -->
             </div>
 
-            <button class="nav-btn" style="margin-top:20px; width:100%; color:var(--error);" id="clear-history">Borrar
-                Todo</button>
+            <button class="nav-btn" style="margin-top:10px; width:100%; color:var(--error); font-size:0.8rem;"
+                id="clear-history">Borrar Todo</button>
         </main>
     </div>
 

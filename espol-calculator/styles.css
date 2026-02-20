@@ -9,6 +9,7 @@
     --text-primary: #1e3a5f;
     --text-secondary: #64748b;
     --text-accent: #0072ce;
+    --text-accent-dark: #005a9e;
 
     --border-color: #e2e8f0;
 
@@ -219,7 +220,6 @@ input[type="text"]:focus {
     transition: color 0.3s ease;
 }
 
-/* Color Coding */
 .grade-pass {
     color: var(--success) !important;
 }
@@ -246,18 +246,14 @@ input[type="text"]:focus {
 .turtle-img {
     display: none;
     max-width: 120px;
-    /* Default for sad turtle */
     height: auto;
     margin-top: 15px;
     animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Specific size for Happy Turtle */
 #img-happy {
     max-width: 160px;
-    /* Bigger as requested */
     margin-top: 10px;
-    /* Adjust positioning */
 }
 
 @keyframes popIn {
@@ -271,7 +267,6 @@ input[type="text"]:focus {
         transform: scale(1);
     }
 }
-
 
 /* DETAILED VIEW */
 .scoreboard {
@@ -410,32 +405,70 @@ input[type="text"]:focus {
     color: var(--error);
 }
 
-/* History */
-.history-header {
-    padding: 20px 0;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+/* History REFINEMENT V12 Dashboard */
+#history input,
+#history button,
+#history .history-name,
+#history .history-grade {
+    font-family: var(--font-serif) !important;
 }
 
+#btn-import-grades {
+    font-size: 1rem !important;
+    background-color: var(--text-accent);
+    border: 1px solid var(--text-accent);
+    padding: 10px;
+    font-weight: normal;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+#btn-import-grades:hover {
+    background-color: var(--text-accent-dark);
+}
+
+#h-manual-name,
+#h-manual-grade {
+    border-radius: 4px;
+    border-color: #cbd5e1;
+    padding: 8px 12px;
+    font-size: 0.95rem;
+}
+
+/* Slot Display overrides */
+/* Ensure proper display when JS sets it to block */
+#slot-display {
+    /* If JS sets display: block, flex container properties like flex-direction are lost on the element itself if previously inline style? No, we used inline style. */
+    /* Let's reinforce flex behavior even if JS toggles display property. 
+       Actually JS sets 'style.display = block'. We can override with !important or assume block is fine.
+       If block, flex items inside cascade vertically by default if div. 
+    */
+    display: none;
+    /* Default */
+}
+
+/* When visible (via JS style attr), we want it to look good. We used inline flex styles in HTML. */
+
 .history-item {
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 12px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    background: white;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.history-item:hover {
+    background: #f8fafc;
 }
 
 .history-name {
-    font-family: var(--font-sans);
-    font-weight: 500;
-    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 400;
+    color: #334155;
 }
 
 .history-grade {
-    font-family: var(--font-serif);
     font-size: 1.1rem;
-    color: var(--text-primary);
+    font-weight: 600;
 }

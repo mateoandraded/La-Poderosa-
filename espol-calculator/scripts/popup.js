@@ -284,8 +284,123 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // === SCRAPING & SLOTS ===
+    const btnImport = document.getElementById('btn-import-grades');
+    const slotDisplay = document.getElementById('slot-display');
+    const slotName = document.getElementById('slot-name');
+    const slotTime = document.getElementById('slot-time');
+
+    if (btnImport) {
+        btnImport.addEventListener('click', async () => {
+            // 1. Get Active Tab
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (!tab || !tab.url.includes('academico.espol.edu.ec')) {
+                alert("Por favor, abre la página de calificaciones en el Académico (academico.espol.edu.ec) antes de importar.");
+                return;
+            }
+
+            // 2. Inject Script
+            try {
+                const results = await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    files: ['scripts/scraper.js']
+                });
+
+                const response = results[0].result;
+                if (!response || !response.success) {
+                    alert("Error al importar: " + (response ? response.message : "Desconocido"));
+                    return;
+                }
+
+                // 3. Process Data
+                const newSubjects = response.data;
+                chrome.storage.local.get(['subjects'], (res) => {
+                    let current = res.subjects || [];
+
+                    // Merge avoiding duplicates (by name)
+                    let addedCount = 0;
+                    newSubjects.forEach(ns => {
+                        const exists = current.find(s => s.name === ns.name);
+                        if (!exists) {
+                            current.push({ ...ns, date: new Date().toISOString() });
+                            addedCount++;
+                        } else {
+                            // Update existing? Maybe logic to update if grade changed
+                            // For now, keep existing or overwrite? Let's overwrite only if new grade is different
+                            if (exists.final !== ns.final) {
+                                exists.final = ns.final;
+                                exists.credits = ns.credits;
+                                addedCount++;
+                            }
+                        }
+                    });
+
+                    chrome.storage.local.set({ subjects: current }, () => {
+                        alert(`¡Éxito! Se importaron/actualizaron ${addedCount} materias.`);
+                        renderHistory();
+                        updateSlot(current);
+                    });
+                });
+
+            } catch (err) {
+                console.error(err);
+                alert("Error técnico: " + err.message);
+            }
+        });
+    }
+
+    function updateSlot(subjects) {
+        if (!subjects || subjects.length === 0) {
+            slotDisplay.style.display = 'none';
+            return;
+        }
+
+        // Calculate Weighted Average (if credits exist) or Simple
+        let totalProd = 0;
+        let totalCreds = 0;
+
+        subjects.forEach(s => {
+            const grade = parseFloat(s.final);
+            const creds = s.credits ? parseFloat(s.credits) : 4; // Default 4 if missing
+            if (!isNaN(grade)) {
+                totalProd += grade * creds;
+                totalCreds += creds;
+            }
+        });
+
+        const avg = totalCreds > 0 ? (totalProd / totalCreds) : 0;
+
+        let franja = "";
+        let horario = "";
+
+        // Reglas de Franjas ESPOL
+        if (avg >= 8.5) { franja = "Primera Franja"; horario = "10:00 AM - 1:00 PM"; }
+        else if (avg >= 8.0) { franja = "Segunda Franja"; horario = "1:00 PM - 4:00 PM"; }
+        else if (avg >= 7.5) { franja = "Tercera Franja"; horario = "4:00 PM - 7:00 PM"; }
+        else if (avg >= 7.0) { franja = "Cuarta Franja"; horario = "7:00 PM - 10:00 PM"; }
+        else if (avg >= 6.5) { franja = "Quinta Franja"; horario = "Día Siguiente 8:00 AM - 11:00 AM"; }
+        else { franja = "Sexta Franja"; horario = "Día Siguiente 11:00 AM - 2:00 PM"; }
+
+        // Baldeo check? (User said < 6.5 is sexta, baldeo is 2pm+)
+        // Assuming Logic covers standard cases based on user info.
+
+        slotName.innerText = `${franja} (Prom: ${avg.toFixed(2)})`;
+        slotTime.innerText = horario;
+        slotDisplay.style.display = 'flex';
+    }
+
     document.getElementById('clear-history').addEventListener('click', () => {
-        if (confirm("¿Eliminar historial?")) chrome.storage.local.set({ subjects: [] }, renderHistory);
+        if (confirm("¿Eliminar historial?")) {
+            chrome.storage.local.set({ subjects: [] }, () => {
+                renderHistory();
+                slotDisplay.style.display = 'none';
+            });
+        }
+    });
+
+    // Initial Render call updates
+    chrome.storage.local.get(['subjects'], res => {
+        if (res.subjects) updateSlot(res.subjects);
     });
 
     renderHistory();

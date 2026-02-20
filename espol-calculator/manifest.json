@@ -17,6 +17,12 @@
     }
   },
   "permissions": [
-    "storage"
+    "storage",
+    "scripting",
+    "tabs",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://www.academico.espol.edu.ec/*"
   ]
 }
