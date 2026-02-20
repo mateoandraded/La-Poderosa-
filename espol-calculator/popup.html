@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora ESPOL</title>
+    <link rel="stylesheet" href="styles.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:wght@300;400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>La Poderosa</h1>
+            <nav class="nav-tabs">
+                <button class="nav-btn active" data-tab="quick">Rápida</button>
+                <button class="nav-btn" data-tab="detailed">Detallada</button>
+                <button class="nav-btn" data-tab="history">Historial</button>
+            </nav>
+        </header>
+
+        <!-- === QUICK CALC === -->
+        <main id="quick" class="view-section active">
+            <!-- Left: Inputs -->
+            <div class="col-left">
+                <div class="card">
+                    <h3>Configuración (%)</h3>
+                    <div class="input-group" style="display:flex; gap:10px; flex-direction:row;">
+                        <!-- Label Bottom: Input first, Label second -->
+                        <div style="flex:1;">
+                            <input type="number" id="q-weight-theo" value="70">
+                            <label>Teórico</label>
+                        </div>
+                        <div style="flex:1;">
+                            <input type="number" id="q-weight-pract" value="30">
+                            <label>Práctico</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <!-- Labels BELOW inputs -->
+                    <div class="input-group">
+                        <input type="number" id="q-p1" placeholder="0 - 100">
+                        <label>Primer Parcial</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="q-p2" placeholder="0 - 100">
+                        <label>Segundo Parcial</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="q-pract" placeholder="0 - 100">
+                        <label>Práctico</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="q-improv" placeholder="Opcional">
+                        <label>Mejoramiento</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Results -->
+            <div class="col-right">
+                <div class="result-area-transparent">
+                    <div class="status-text" id="q-status">Hola</div>
+                    <div class="grade-big" id="q-grade">--</div>
+                    <div class="advice-text" id="q-advice">Ingresa tus notas para comenzar</div>
+                    <img src="assets/happy_turtle.png" id="img-happy" class="turtle-img" alt="Feliz">
+                    <img src="assets/sad_turtle.png" id="img-sad" class="turtle-img" alt="Triste">
+                </div>
+                <div style="margin-top:auto; width:100%;">
+                    <div class="input-group">
+                        <input type="text" id="q-subject" placeholder="Nombre de materia..." style="text-align:center;">
+                    </div>
+                    <button class="btn-primary" id="q-save-btn">Guardar</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- === DETAILED CALC === -->
+        <main id="detailed" class="view-section" style="flex-direction: column;">
+
+            <!-- Scoreboard -->
+            <div class="scoreboard">
+                <div class="score-card">
+                    <div class="score-label">1er Parcial</div>
+                    <div class="score-val" id="score-p1">--</div>
+                </div>
+                <div class="score-card">
+                    <div class="score-label">2do Parcial</div>
+                    <div class="score-val" id="score-p2">--</div>
+                </div>
+                <div class="score-card">
+                    <div class="score-label">Práctico</div>
+                    <div class="score-val" id="score-pr">--</div>
+                </div>
+            </div>
+
+            <!-- Sub Nav -->
+            <nav class="sub-nav">
+                <button class="sub-nav-btn active" data-sub="d-p1">Primer Parcial</button>
+                <button class="sub-nav-btn" data-sub="d-p2">Segundo Parcial</button>
+                <button class="sub-nav-btn" data-sub="d-pr">Práctico</button>
+            </nav>
+
+            <!-- CONTENT P1 -->
+            <div id="d-p1" class="detailed-content active">
+                <div style="display:flex; gap:20px; height:100%; width:100%;">
+                    <!-- Config -->
+                    <div class="col-left">
+                        <div class="card">
+                            <h3>Ponderación (%)</h3>
+                            <div class="input-group"><input type="number" id="p1-w-les"
+                                    value="25"><label>Lecciones</label></div>
+                            <div class="input-group"><input type="number" id="p1-w-tas" value="25"><label>Tareas</label>
+                            </div>
+                            <div class="input-group"><input type="number" id="p1-w-act"
+                                    value="0"><label>Actividades</label></div>
+                            <div class="input-group"><input type="number" id="p1-w-pro"
+                                    value="0"><label>Proyecto</label></div>
+                            <div class="input-group"
+                                style="padding-top:10px; border-top:1px solid var(--border-color);">
+                                <input type="number" id="p1-w-exa" value="50"><label>Examen</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Groups (Exam First) -->
+                    <div class="col-right" style="overflow-y: auto; padding-right:5px; justify-content: flex-start;">
+                        <!-- Examen FIRST -->
+                        <div class="card" style="margin-bottom: 16px;">
+                            <input type="number" id="p1-exam-score" placeholder="Nota Examen">
+                            <label>Examen Parcial</label>
+                        </div>
+
+                        <div class="component-group">
+                            <div class="group-header"><span class="group-title">Lecciones</span><button class="add-mini"
+                                    data-add="p1-list-les" data-type="Lección">+</button></div>
+                            <div id="p1-list-les"></div>
+                        </div>
+                        <div class="component-group">
+                            <div class="group-header"><span class="group-title">Tareas</span><button class="add-mini"
+                                    data-add="p1-list-tas" data-type="Tarea">+</button></div>
+                            <div id="p1-list-tas"></div>
+                        </div>
+                        <div class="component-group">
+                            <div class="group-header"><span class="group-title">Actividades</span><button
+                                    class="add-mini" data-add="p1-list-act" data-type="Actividad">+</button></div>
+                            <div id="p1-list-act"></div>
+                        </div>
+                        <div class="component-group">
+                            <div class="group-header"><span class="group-title">Proyecto</span><button class="add-mini"
+                                    data-add="p1-list-pro" data-type="Proyecto">+</button></div>
+                            <div id="p1-list-pro"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENT P2 -->
+            <div id="d-p2" class="detailed-content">
+                <div style="display:flex; gap:20px; height:100%; width:100%;">
+                    <div class="col-left">
+                        <div class="card">
+                            <h3>Ponderación (%)</h3>
+                            <div class="input-group"><input type="number" id="p2-w-les"
+                                    value="25"><label>Lecciones</label></div>
+                            <div class="input-group"><input type="number" id="p2-w-tas" value="25"><label>Tareas</label>
+                            </div>
+                            <div class="input-group"><input type="number" id="p2-w-act"
+                                    value="0"><label>Actividades</label></div>
+                            <div class="input-group"><input type="number" id="p2-w-pro"
+                                    value="0"><label>Proyecto</label></div>
+                            <div class="input-group"
+                                style="padding-top:10px; border-top:1px solid var(--border-color);">
+                                <input type="number" id="p2-w-exa" value="50"><label>Examen</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-right" style="overflow-y: auto; padding-right:5px; justify-content: flex-start;">
+                        <!-- Examen FIRST -->
+                        <div class="card" style="margin-bottom: 16px;">
+                            <input type="number" id="p2-exam-score" placeholder="Nota Examen">
+                            <label>Examen Parcial</label>
+                        </div>
+
+                        <div class="component-group">
+                            <div class="group-header"><span class="group-title">Lecciones</span><button class="add-mini"
+                                    data-add="p2-list-les" data-type="Lección">+</button></div>
+                            <div id="p2-list-les"></div>
+                        </div>
+                        <div class="component-group">
+                            <div class="group-header"><span class="group-title">Tareas</span><button class="add-mini"
+                                    data-add="p2-list-tas" data-type="Tarea">+</button></div>
+                            <div id="p2-list-tas"></div>
+                        </div>
+                        <div class="component-group">
+                            <div class="group-header"><span class="group-title">Actividades</span><button
+                                    class="add-mini" data-add="p2-list-act" data-type="Actividad">+</button></div>
+                            <div id="p2-list-act"></div>
+                        </div>
+                        <div class="component-group">
+                            <div class="group-header"><span class="group-title">Proyecto</span><button class="add-mini"
+                                    data-add="p2-list-pro" data-type="Proyecto">+</button></div>
+                            <div id="p2-list-pro"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENT PRACTICO -->
+            <div id="d-pr" class="detailed-content">
+                <div style="display:flex; gap:20px; height:100%; width:100%;">
+                    <div class="col-left">
+                        <div class="card">
+                            <h3>Ponderación (%)</h3>
+                            <div class="input-group"><input type="number" id="pr-w-les"
+                                    value="100"><label>Lecciones</label></div>
+                            <div class="input-group"><input type="number" id="pr-w-tas" value="0"><label>Tareas</label>
+                            </div>
+                            <!-- Nuevo Proyecto in Practical -->
+                            <div class="input-group"><input type="number" id="pr-w-pro"
+                                    value="0"><label>Proyecto</label></div>
+
+                            <div class="input-group"
+                                style="padding-top:10px; border-top:1px solid var(--border-color);">
+                                <input type="number" id="pr-w-exa" value="0"><label>Examen</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-right" style="overflow-y: auto; padding-right:5px; justify-content: flex-start;">
+                        <!-- Examen FIRST -->
+                        <div class="card" style="margin-bottom: 16px;">
+                            <input type="number" id="pr-exam-score" placeholder="Nota Examen">
+                            <label>Examen Práctico</label>
+                        </div>
+
+                        <div class="component-group">
+                            <div class="group-header"><span class="group-title">Lecciones</span><button class="add-mini"
+                                    data-add="pr-list-les" data-type="Lección">+</button></div>
+                            <div id="pr-list-les"></div>
+                        </div>
+                        <div class="component-group">
+                            <div class="group-header"><span class="group-title">Tareas</span><button class="add-mini"
+                                    data-add="pr-list-tas" data-type="Tarea">+</button></div>
+                            <div id="pr-list-tas"></div>
+                        </div>
+                        <!-- Nuevo Proyecto List -->
+                        <div class="component-group">
+                            <div class="group-header"><span class="group-title">Proyecto</span><button class="add-mini"
+                                    data-add="pr-list-pro" data-type="Proyecto">+</button></div>
+                            <div id="pr-list-pro"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- === HISTORY === -->
+        <main id="history" class="view-section" style="flex-direction: column;">
+            <div class="history-header">
+                <div>
+                    <div
+                        style="font-size:0.75rem; color:var(--text-secondary); font-weight:600; text-transform: uppercase;">
+                        Promedio General</div>
+                </div>
+                <div style="font-size:2rem; font-weight:400; color:var(--text-primary); font-family: var(--font-serif);"
+                    id="general-average">--</div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-bottom:15px; align-items: flex-end;">
+                <div class="input-group" style="flex:2">
+                    <input type="text" id="h-manual-name" placeholder="Materia">
+                </div>
+                <div class="input-group" style="flex:1">
+                    <input type="number" id="h-manual-grade" placeholder="Nota">
+                </div>
+                <button class="btn-primary" id="h-manual-add"
+                    style="width:auto; padding: 10px 15px; margin-bottom: 12px;">+</button>
+            </div>
+
+            <div style="flex:1; overflow-y:auto;" id="history-list">
+                <!-- Items -->
+            </div>
+
+            <button class="nav-btn" style="margin-top:20px; width:100%; color:var(--error);" id="clear-history">Borrar
+                Todo</button>
+        </main>
+    </div>
+
+    <script src="scripts/logic.js"></script>
+    <script src="scripts/popup.js"></script>
+</body>
+
+</html>
