@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Colors
         qOut.grade.classList.remove('grade-pass', 'grade-fail');
         if (state === 'complete') {
-            if (gradeVal >= 60) qOut.grade.classList.add('grade-pass');
+            if (gradeVal >= 6.0) qOut.grade.classList.add('grade-pass');
             else qOut.grade.classList.add('grade-fail');
         }
 
@@ -61,10 +61,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calcQuick() {
-        const p1 = parse(qIn.p1.value);
-        const p2 = parse(qIn.p2.value);
-        const pr = parse(qIn.pract.value);
-        const im = parse(qIn.impr.value);
+        const p1 = qIn.p1.value !== '' ? Math.round(parse(qIn.p1.value)) : 0;
+        const p2 = qIn.p2.value !== '' ? Math.round(parse(qIn.p2.value)) : 0;
+        const pr = qIn.pract.value !== '' ? Math.round(parse(qIn.pract.value)) : 0;
+        const im = qIn.impr.value !== '' ? Math.round(parse(qIn.impr.value)) : 0;
         const wT = parse(qIn.wTheo.value) / 100;
         const wP = parse(qIn.wPract.value) / 100;
 
@@ -156,11 +156,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const recalc = () => {
             const sums = {};
+            let hasDetInput = false;
+
             for (const [type, listId] of Object.entries(structure)) {
                 if (!sums[type]) sums[type] = [];
                 const inputs = document.querySelectorAll(`#${listId} input`);
-                inputs.forEach(i => sums[type].push(parse(i.value)));
+                inputs.forEach(i => {
+                    if (i.value.trim() !== '') hasDetInput = true;
+                    sums[type].push(parse(i.value));
+                });
             }
+
+            const examInput = document.getElementById(examId);
+            if (examInput && examInput.value.trim() !== '') hasDetInput = true;
 
             const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
 
@@ -182,10 +190,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const examW = parse(document.getElementById(weights.exa).value) / 100;
             total += examVal * examW;
 
-            const resStr = total.toFixed(2);
-            document.getElementById(scoreElId).innerText = resStr;
             const targetInput = document.getElementById(targetInputId);
-            if (targetInput) targetInput.value = resStr;
+            
+            if (hasDetInput) {
+                const roundedTotal = Math.round(total);
+                document.getElementById(scoreElId).innerText = roundedTotal.toString();
+                if (targetInput) targetInput.value = roundedTotal;
+            } else {
+                document.getElementById(scoreElId).innerText = "--";
+            }
 
             calcQuick();
         };
@@ -218,6 +231,27 @@ document.addEventListener('DOMContentLoaded', () => {
         'pr-exam-score', 'score-pr', 'q-pract',
         { 'Lección': 'pr-list-les', 'Tarea': 'pr-list-tas', 'Proyecto': 'pr-list-pro' }
     );
+
+    // === DETAILED CALC CLEANUP ===
+    const btnClearDetailed = document.getElementById('btn-clear-detailed');
+    if (btnClearDetailed) {
+        btnClearDetailed.addEventListener('click', () => {
+            if (confirm("¿Limpiar todos los datos (tareas, lecciones, exámenes) de la vista detallada? Las ponderaciones se mantendrán.")) {
+                document.querySelectorAll('.row-item').forEach(el => el.remove());
+                ['p1-exam-score', 'p2-exam-score', 'pr-exam-score'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+                
+                ['p1-w-les', 'p2-w-les', 'pr-w-les'].forEach(id => {
+                    const wEl = document.getElementById(id);
+                    if (wEl) wEl.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+                
+                if(typeof saveAppState === 'function') saveAppState();
+            }
+        });
+    }
 
     // === HISTORY ===
     const hList = document.getElementById('history-list');
@@ -384,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Baldeo check? (User said < 6.5 is sexta, baldeo is 2pm+)
         // Assuming Logic covers standard cases based on user info.
 
-        slotName.innerText = `${franja} (Prom: ${avg.toFixed(2)})`;
+        slotName.innerText = ` ${franja}`;
         slotTime.innerText = horario;
         slotDisplay.style.display = 'flex';
     }
@@ -404,5 +438,120 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     renderHistory();
-    calcQuick(); // Force initial status
+
+    // === PERSISTENCE LOGIC ===
+    let saveTimeout = null;
+    function saveAppState() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            const staticInputs = {};
+            document.querySelectorAll('input').forEach(inp => {
+                if (inp.id) staticInputs[inp.id] = inp.value;
+            });
+
+            const dynamicLists = {};
+            const listIds = [
+                'p1-list-les', 'p1-list-tas', 'p1-list-act', 'p1-list-pro',
+                'p2-list-les', 'p2-list-tas', 'p2-list-act', 'p2-list-pro',
+                'pr-list-les', 'pr-list-tas', 'pr-list-pro'
+            ];
+            listIds.forEach(lId => {
+                const listEl = document.getElementById(lId);
+                if (listEl) {
+                    dynamicLists[lId] = Array.from(listEl.querySelectorAll('input.det-val')).map(inp => inp.value);
+                }
+            });
+
+            const activeMainTab = document.querySelector('.nav-tabs .nav-btn.active')?.dataset.tab || 'quick';
+            const activeSubTab = document.querySelector('.sub-nav .sub-nav-btn.active')?.dataset.sub || 'd-p1';
+
+            chrome.storage.local.set({ appState: { staticInputs, dynamicLists, activeMainTab, activeSubTab } });
+        }, 500);
+    }
+
+    // Listeners for persistence and integers
+    document.addEventListener('input', (e) => {
+        if (e.target.tagName === 'INPUT') {
+            const isNumberInput = e.target.type === 'number';
+            const isHistoryManual = e.target.id === 'h-manual-grade';
+
+            // Convert to integer (except history which can have decimals over 10)
+            if (isNumberInput && !isHistoryManual) {
+                if (e.target.value.includes('.') || e.target.value.includes(',')) {
+                    e.target.value = parseInt(e.target.value) || '';
+                }
+                if (e.target.value !== '') {
+                    let v = parseInt(e.target.value, 10);
+                    if (v > 100) e.target.value = 100;
+                    if (v < 0) e.target.value = 0;
+                }
+            }
+            saveAppState();
+        }
+    }, true);
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('del-btn') || 
+            e.target.classList.contains('add-mini') || 
+            e.target.classList.contains('nav-btn') || 
+            e.target.classList.contains('sub-nav-btn')) {
+            saveAppState();
+        }
+    });
+
+    // Restore state
+    function restoreAppState() {
+        chrome.storage.local.get(['appState'], (res) => {
+            if (!res.appState) {
+                calcQuick();
+                return;
+            }
+            const state = res.appState;
+
+            // 1. Restore Static Inputs
+            if (state.staticInputs) {
+                for (const [id, val] of Object.entries(state.staticInputs)) {
+                    const el = document.getElementById(id);
+                    if (el) el.value = val;
+                }
+            }
+
+            // 2. Restore Dynamic Lists
+            if (state.dynamicLists) {
+                for (const [listId, vals] of Object.entries(state.dynamicLists)) {
+                    const listEl = document.getElementById(listId);
+                    const btnAdd = document.querySelector(`button[data-add="${listId}"]`);
+                    if (listEl && vals && btnAdd) {
+                        vals.forEach(val => {
+                            btnAdd.click(); // Create row
+                            const inputs = listEl.querySelectorAll('input.det-val');
+                            const lastInput = inputs[inputs.length - 1];
+                            if (lastInput) lastInput.value = val;
+                        });
+                    }
+                }
+            }
+
+            // 3. Restore Active Tabs
+            if (state.activeMainTab) {
+                const mainTab = document.querySelector(`.nav-tabs .nav-btn[data-tab="${state.activeMainTab}"]`);
+                if (mainTab) mainTab.click();
+            }
+            if (state.activeSubTab) {
+                const subTab = document.querySelector(`.sub-nav .sub-nav-btn[data-sub="${state.activeSubTab}"]`);
+                if (subTab) subTab.click();
+            }
+
+            // Manually trigger calculation for all inputs to ensure formulas run
+            document.querySelectorAll('input').forEach(inp => {
+               if (inp.id) inp.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+            document.querySelectorAll('input.det-val').forEach(inp => {
+               inp.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+
+            calcQuick(); 
+        });
+    }
+
+    restoreAppState();
 });

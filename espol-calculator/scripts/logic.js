@@ -39,7 +39,7 @@ const Logic = {
             p2: p2Val,
             practical: practVal,
             theoreticalAvg: parseFloat(theoreticalAvg.toFixed(2)),
-            final: parseFloat(finalGrade.toFixed(2)),
+            final: parseFloat((finalGrade / 10).toFixed(2)),
             passed: finalGrade >= 60.0
         };
     },
